@@ -470,6 +470,12 @@ function attachedDeposit() {
   return env.attached_deposit();
 }
 /**
+ * Returns the amount of Gas that was attached to this function call.
+ */
+function prepaidGas() {
+  return env.prepaid_gas();
+}
+/**
  * Reads the value from NEAR storage that is stored under the provided key.
  *
  * @param key - The key to read from storage.
@@ -513,11 +519,162 @@ function storageRemove(key) {
   return env.storage_remove(key, EVICTED_REGISTER) === 1n;
 }
 /**
+ * Returns the cost of storing 0 Byte on NEAR storage.
+ */
+function storageByteCost() {
+  return 10000000000000000000n;
+}
+/**
  * Returns the arguments passed to the current smart contract call.
  */
 function input() {
   env.input(0);
   return env.read_register(0);
+}
+/**
+ * Join an arbitrary array of NEAR promises.
+ *
+ * @param promiseIndexes - An arbitrary array of NEAR promise indexes to join.
+ */
+function promiseAnd(...promiseIndexes) {
+  return env.promise_and(...promiseIndexes);
+}
+/**
+ * Create a NEAR promise which will have multiple promise actions inside.
+ *
+ * @param accountId - The account ID of the target contract.
+ */
+function promiseBatchCreate(accountId) {
+  return env.promise_batch_create(accountId);
+}
+/**
+ * Attach a callback NEAR promise to a batch of NEAR promise actions.
+ *
+ * @param promiseIndex - The NEAR promise index of the batch.
+ * @param accountId - The account ID of the target contract.
+ */
+function promiseBatchThen(promiseIndex, accountId) {
+  return env.promise_batch_then(promiseIndex, accountId);
+}
+/**
+ * Attach a create account promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a create account action to.
+ */
+function promiseBatchActionCreateAccount(promiseIndex) {
+  env.promise_batch_action_create_account(promiseIndex);
+}
+/**
+ * Attach a deploy contract promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a deploy contract action to.
+ * @param code - The WASM byte code of the contract to be deployed.
+ */
+function promiseBatchActionDeployContract(promiseIndex, code) {
+  env.promise_batch_action_deploy_contract(promiseIndex, code);
+}
+/**
+ * Attach a function call promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a function call action to.
+ * @param methodName - The name of the method to be called.
+ * @param args - The arguments to call the method with.
+ * @param amount - The amount of NEAR to attach to the call.
+ * @param gas - The amount of Gas to attach to the call.
+ */
+function promiseBatchActionFunctionCall(promiseIndex, methodName, args, amount, gas) {
+  env.promise_batch_action_function_call(promiseIndex, methodName, args, amount, gas);
+}
+/**
+ * Attach a transfer promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a transfer action to.
+ * @param amount - The amount of NEAR to transfer.
+ */
+function promiseBatchActionTransfer(promiseIndex, amount) {
+  env.promise_batch_action_transfer(promiseIndex, amount);
+}
+/**
+ * Attach a stake promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a stake action to.
+ * @param amount - The amount of NEAR to stake.
+ * @param publicKey - The public key with which to stake.
+ */
+function promiseBatchActionStake(promiseIndex, amount, publicKey) {
+  env.promise_batch_action_stake(promiseIndex, amount, publicKey);
+}
+/**
+ * Attach a add full access key promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a add full access key action to.
+ * @param publicKey - The public key to add as a full access key.
+ * @param nonce - The nonce to use.
+ */
+function promiseBatchActionAddKeyWithFullAccess(promiseIndex, publicKey, nonce) {
+  env.promise_batch_action_add_key_with_full_access(promiseIndex, publicKey, nonce);
+}
+/**
+ * Attach a add access key promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a add access key action to.
+ * @param publicKey - The public key to add.
+ * @param nonce - The nonce to use.
+ * @param allowance - The allowance of the access key.
+ * @param receiverId - The account ID of the receiver.
+ * @param methodNames - The names of the method to allow the key for.
+ */
+function promiseBatchActionAddKeyWithFunctionCall(promiseIndex, publicKey, nonce, allowance, receiverId, methodNames) {
+  env.promise_batch_action_add_key_with_function_call(promiseIndex, publicKey, nonce, allowance, receiverId, methodNames);
+}
+/**
+ * Attach a delete key promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a delete key action to.
+ * @param publicKey - The public key to delete.
+ */
+function promiseBatchActionDeleteKey(promiseIndex, publicKey) {
+  env.promise_batch_action_delete_key(promiseIndex, publicKey);
+}
+/**
+ * Attach a delete account promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a delete account action to.
+ * @param beneficiaryId - The account ID of the beneficiary - the account that receives the remaining amount of NEAR.
+ */
+function promiseBatchActionDeleteAccount(promiseIndex, beneficiaryId) {
+  env.promise_batch_action_delete_account(promiseIndex, beneficiaryId);
+}
+/**
+ * Attach a function call with weight promise action to the NEAR promise index with the provided promise index.
+ *
+ * @param promiseIndex - The index of the promise to attach a function call with weight action to.
+ * @param methodName - The name of the method to be called.
+ * @param args - The arguments to call the method with.
+ * @param amount - The amount of NEAR to attach to the call.
+ * @param gas - The amount of Gas to attach to the call.
+ * @param weight - The weight of unused Gas to use.
+ */
+function promiseBatchActionFunctionCallWeight(promiseIndex, methodName, args, amount, gas, weight) {
+  env.promise_batch_action_function_call_weight(promiseIndex, methodName, args, amount, gas, weight);
+}
+/**
+ * Returns the result of the NEAR promise for the passed promise index.
+ *
+ * @param promiseIndex - The index of the promise to return the result for.
+ */
+function promiseResult(promiseIndex) {
+  const status = env.promise_result(promiseIndex, 0);
+  assert(Number(status) === PromiseResult.Successful, `Promise result ${status == PromiseResult.Failed ? "Failed" : status == PromiseResult.NotReady ? "NotReady" : status}`);
+  return env.read_register(0);
+}
+/**
+ * Executes the promise in the NEAR WASM virtual machine.
+ *
+ * @param promiseIndex - The index of the promise to execute.
+ */
+function promiseReturn(promiseIndex) {
+  env.promise_return(promiseIndex);
 }
 
 /**
@@ -1053,7 +1210,423 @@ class UnorderedSet {
   }
 }
 
+/**
+ * A promise action which can be executed on the NEAR blockchain.
+ */
+class PromiseAction {}
+/**
+ * A create account promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class CreateAccount extends PromiseAction {
+  add(promiseIndex) {
+    promiseBatchActionCreateAccount(promiseIndex);
+  }
+}
+/**
+ * A deploy contract promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class DeployContract extends PromiseAction {
+  /**
+   * @param code - The code of the contract to be deployed.
+   */
+  constructor(code) {
+    super();
+    this.code = code;
+  }
+  add(promiseIndex) {
+    promiseBatchActionDeployContract(promiseIndex, this.code);
+  }
+}
+/**
+ * A function call promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class FunctionCall extends PromiseAction {
+  /**
+   * @param functionName - The name of the function to be called.
+   * @param args - The arguments to be passed to the function.
+   * @param amount - The amount of NEAR to attach to the call.
+   * @param gas - The amount of Gas to attach to the call.
+   */
+  constructor(functionName, args, amount, gas) {
+    super();
+    this.functionName = functionName;
+    this.args = args;
+    this.amount = amount;
+    this.gas = gas;
+  }
+  add(promiseIndex) {
+    promiseBatchActionFunctionCall(promiseIndex, this.functionName, this.args, this.amount, this.gas);
+  }
+}
+/**
+ * A function call weight promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class FunctionCallWeight extends PromiseAction {
+  /**
+   * @param functionName - The name of the function to be called.
+   * @param args - The arguments to be passed to the function.
+   * @param amount - The amount of NEAR to attach to the call.
+   * @param gas - The amount of Gas to attach to the call.
+   * @param weight - The weight of unused Gas to use.
+   */
+  constructor(functionName, args, amount, gas, weight) {
+    super();
+    this.functionName = functionName;
+    this.args = args;
+    this.amount = amount;
+    this.gas = gas;
+    this.weight = weight;
+  }
+  add(promiseIndex) {
+    promiseBatchActionFunctionCallWeight(promiseIndex, this.functionName, this.args, this.amount, this.gas, this.weight);
+  }
+}
+/**
+ * A transfer promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class Transfer extends PromiseAction {
+  /**
+   * @param amount - The amount of NEAR to tranfer.
+   */
+  constructor(amount) {
+    super();
+    this.amount = amount;
+  }
+  add(promiseIndex) {
+    promiseBatchActionTransfer(promiseIndex, this.amount);
+  }
+}
+/**
+ * A stake promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class Stake extends PromiseAction {
+  /**
+   * @param amount - The amount of NEAR to tranfer.
+   * @param publicKey - The public key to use for staking.
+   */
+  constructor(amount, publicKey) {
+    super();
+    this.amount = amount;
+    this.publicKey = publicKey;
+  }
+  add(promiseIndex) {
+    promiseBatchActionStake(promiseIndex, this.amount, this.publicKey.data);
+  }
+}
+/**
+ * A add full access key promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class AddFullAccessKey extends PromiseAction {
+  /**
+   * @param publicKey - The public key to add as a full access key.
+   * @param nonce - The nonce to use.
+   */
+  constructor(publicKey, nonce) {
+    super();
+    this.publicKey = publicKey;
+    this.nonce = nonce;
+  }
+  add(promiseIndex) {
+    promiseBatchActionAddKeyWithFullAccess(promiseIndex, this.publicKey.data, this.nonce);
+  }
+}
+/**
+ * A add access key promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class AddAccessKey extends PromiseAction {
+  /**
+   * @param publicKey - The public key to add as a access key.
+   * @param allowance - The allowance for the key in yoctoNEAR.
+   * @param receiverId - The account ID of the reciever.
+   * @param functionNames - The names of funcitons to authorize.
+   * @param nonce - The nonce to use.
+   */
+  constructor(publicKey, allowance, receiverId, functionNames, nonce) {
+    super();
+    this.publicKey = publicKey;
+    this.allowance = allowance;
+    this.receiverId = receiverId;
+    this.functionNames = functionNames;
+    this.nonce = nonce;
+  }
+  add(promiseIndex) {
+    promiseBatchActionAddKeyWithFunctionCall(promiseIndex, this.publicKey.data, this.nonce, this.allowance, this.receiverId, this.functionNames);
+  }
+}
+/**
+ * A delete key promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class DeleteKey extends PromiseAction {
+  /**
+   * @param publicKey - The public key to delete from the account.
+   */
+  constructor(publicKey) {
+    super();
+    this.publicKey = publicKey;
+  }
+  add(promiseIndex) {
+    promiseBatchActionDeleteKey(promiseIndex, this.publicKey.data);
+  }
+}
+/**
+ * A delete account promise action.
+ *
+ * @extends {PromiseAction}
+ */
+class DeleteAccount extends PromiseAction {
+  /**
+   * @param beneficiaryId - The beneficiary of the account deletion - the account to recieve all of the remaining funds of the deleted account.
+   */
+  constructor(beneficiaryId) {
+    super();
+    this.beneficiaryId = beneficiaryId;
+  }
+  add(promiseIndex) {
+    promiseBatchActionDeleteAccount(promiseIndex, this.beneficiaryId);
+  }
+}
+class PromiseSingle {
+  constructor(accountId, actions, after, promiseIndex) {
+    this.accountId = accountId;
+    this.actions = actions;
+    this.after = after;
+    this.promiseIndex = promiseIndex;
+  }
+  constructRecursively() {
+    if (this.promiseIndex !== null) {
+      return this.promiseIndex;
+    }
+    const promiseIndex = this.after ? promiseBatchThen(this.after.constructRecursively(), this.accountId) : promiseBatchCreate(this.accountId);
+    this.actions.forEach(action => action.add(promiseIndex));
+    this.promiseIndex = promiseIndex;
+    return promiseIndex;
+  }
+}
+class PromiseJoint {
+  constructor(promiseA, promiseB, promiseIndex) {
+    this.promiseA = promiseA;
+    this.promiseB = promiseB;
+    this.promiseIndex = promiseIndex;
+  }
+  constructRecursively() {
+    if (this.promiseIndex !== null) {
+      return this.promiseIndex;
+    }
+    const result = promiseAnd(this.promiseA.constructRecursively(), this.promiseB.constructRecursively());
+    this.promiseIndex = result;
+    return result;
+  }
+}
+/**
+ * A high level class to construct and work with NEAR promises.
+ */
+class NearPromise {
+  /**
+   * @param subtype - The subtype of the promise.
+   * @param shouldReturn - Whether the promise should return.
+   */
+  constructor(subtype, shouldReturn) {
+    this.subtype = subtype;
+    this.shouldReturn = shouldReturn;
+  }
+  /**
+   * Creates a new promise to the provided account ID.
+   *
+   * @param accountId - The account ID on which to call the promise.
+   */
+  static new(accountId) {
+    const subtype = new PromiseSingle(accountId, [], null, null);
+    return new NearPromise(subtype, false);
+  }
+  addAction(action) {
+    if (this.subtype instanceof PromiseJoint) {
+      throw new Error("Cannot add action to a joint promise.");
+    }
+    this.subtype.actions.push(action);
+    return this;
+  }
+  /**
+   * Creates a create account promise action and adds it to the current promise.
+   */
+  createAccount() {
+    return this.addAction(new CreateAccount());
+  }
+  /**
+   * Creates a deploy contract promise action and adds it to the current promise.
+   *
+   * @param code - The code of the contract to be deployed.
+   */
+  deployContract(code) {
+    return this.addAction(new DeployContract(code));
+  }
+  /**
+   * Creates a function call promise action and adds it to the current promise.
+   *
+   * @param functionName - The name of the function to be called.
+   * @param args - The arguments to be passed to the function.
+   * @param amount - The amount of NEAR to attach to the call.
+   * @param gas - The amount of Gas to attach to the call.
+   */
+  functionCall(functionName, args, amount, gas) {
+    return this.addAction(new FunctionCall(functionName, args, amount, gas));
+  }
+  /**
+   * Creates a function call weight promise action and adds it to the current promise.
+   *
+   * @param functionName - The name of the function to be called.
+   * @param args - The arguments to be passed to the function.
+   * @param amount - The amount of NEAR to attach to the call.
+   * @param gas - The amount of Gas to attach to the call.
+   * @param weight - The weight of unused Gas to use.
+   */
+  functionCallWeight(functionName, args, amount, gas, weight) {
+    return this.addAction(new FunctionCallWeight(functionName, args, amount, gas, weight));
+  }
+  /**
+   * Creates a transfer promise action and adds it to the current promise.
+   *
+   * @param amount - The amount of NEAR to tranfer.
+   */
+  transfer(amount) {
+    return this.addAction(new Transfer(amount));
+  }
+  /**
+   * Creates a stake promise action and adds it to the current promise.
+   *
+   * @param amount - The amount of NEAR to tranfer.
+   * @param publicKey - The public key to use for staking.
+   */
+  stake(amount, publicKey) {
+    return this.addAction(new Stake(amount, publicKey));
+  }
+  /**
+   * Creates a add full access key promise action and adds it to the current promise.
+   * Uses 0n as the nonce.
+   *
+   * @param publicKey - The public key to add as a full access key.
+   */
+  addFullAccessKey(publicKey) {
+    return this.addFullAccessKeyWithNonce(publicKey, 0n);
+  }
+  /**
+   * Creates a add full access key promise action and adds it to the current promise.
+   * Allows you to specify the nonce.
+   *
+   * @param publicKey - The public key to add as a full access key.
+   * @param nonce - The nonce to use.
+   */
+  addFullAccessKeyWithNonce(publicKey, nonce) {
+    return this.addAction(new AddFullAccessKey(publicKey, nonce));
+  }
+  /**
+   * Creates a add access key promise action and adds it to the current promise.
+   * Uses 0n as the nonce.
+   *
+   * @param publicKey - The public key to add as a access key.
+   * @param allowance - The allowance for the key in yoctoNEAR.
+   * @param receiverId - The account ID of the reciever.
+   * @param functionNames - The names of funcitons to authorize.
+   */
+  addAccessKey(publicKey, allowance, receiverId, functionNames) {
+    return this.addAccessKeyWithNonce(publicKey, allowance, receiverId, functionNames, 0n);
+  }
+  /**
+   * Creates a add access key promise action and adds it to the current promise.
+   * Allows you to specify the nonce.
+   *
+   * @param publicKey - The public key to add as a access key.
+   * @param allowance - The allowance for the key in yoctoNEAR.
+   * @param receiverId - The account ID of the reciever.
+   * @param functionNames - The names of funcitons to authorize.
+   * @param nonce - The nonce to use.
+   */
+  addAccessKeyWithNonce(publicKey, allowance, receiverId, functionNames, nonce) {
+    return this.addAction(new AddAccessKey(publicKey, allowance, receiverId, functionNames, nonce));
+  }
+  /**
+   * Creates a delete key promise action and adds it to the current promise.
+   *
+   * @param publicKey - The public key to delete from the account.
+   */
+  deleteKey(publicKey) {
+    return this.addAction(new DeleteKey(publicKey));
+  }
+  /**
+   * Creates a delete account promise action and adds it to the current promise.
+   *
+   * @param beneficiaryId - The beneficiary of the account deletion - the account to recieve all of the remaining funds of the deleted account.
+   */
+  deleteAccount(beneficiaryId) {
+    return this.addAction(new DeleteAccount(beneficiaryId));
+  }
+  /**
+   * Joins the provided promise with the current promise, making the current promise a joint promise subtype.
+   *
+   * @param other - The promise to join with the current promise.
+   */
+  and(other) {
+    const subtype = new PromiseJoint(this, other, null);
+    return new NearPromise(subtype, false);
+  }
+  /**
+   * Adds a callback to the current promise.
+   *
+   * @param other - The promise to be executed as the promise.
+   */
+  then(other) {
+    assert(other.subtype instanceof PromiseSingle, "Cannot callback joint promise.");
+    assert(other.subtype.after === null, "Cannot callback promise which is already scheduled after another");
+    other.subtype.after = this;
+    return other;
+  }
+  /**
+   * Sets the shouldReturn field to true.
+   */
+  asReturn() {
+    this.shouldReturn = true;
+    return this;
+  }
+  /**
+   * Recursively goes through the current promise to get the promise index.
+   */
+  constructRecursively() {
+    const result = this.subtype.constructRecursively();
+    if (this.shouldReturn) {
+      promiseReturn(result);
+    }
+    return result;
+  }
+  /**
+   * Called by NearBindgen, when return object is a NearPromise instance.
+   */
+  onReturn() {
+    this.asReturn().constructRecursively();
+  }
+}
+
 var _dec, _dec2, _dec3, _dec4, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _dec12, _dec13, _dec14, _dec15, _class, _class2;
+// ------- CONSTANT -------
+const GAS_FOR_RESOLVE_TRANSFER = BigInt(15_000_000_000_000);
+const GAS_FOR_NFT_TRANSFER_CALL = BigInt(30_000_000_000_000) + GAS_FOR_RESOLVE_TRANSFER;
+const GAS_FOR_NFT_APPROVE = BigInt(20_000_000_000_000);
 class NFTContractMetadata {
   // required, essentially a version like "nft-2.0.0", replacing "2.0.0" with the implemented version of NEP-177
   // required, ex. "Mochi Rising — Digital Edition" or "Metaverse 3"
@@ -1076,13 +1649,23 @@ class NFTContractMetadata {
 
 // ------- TOKEN AND CONTRACT -------
 class Token {
-  constructor(token_id, owner_id, token_metadata) {
+  constructor(token_id, owner_id, token_metadata, approved_account_ids) {
     this.token_id = token_id;
     this.owner_id = owner_id;
     this.token_metadata = token_metadata;
+    this.approved_account_ids = approved_account_ids;
+  }
+  static reconstruct(data) {
+    return new Token(data.token_id, data.owner_id, data.token_metadata, data.approved_account_ids);
   }
 }
-let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), _dec4 = call({}), _dec5 = call({}), _dec6 = call({}), _dec7 = view(), _dec8 = call({}), _dec9 = call({}), _dec10 = call({}), _dec11 = view(), _dec12 = view(), _dec13 = view(), _dec14 = view(), _dec15 = view(), _dec(_class = (_class2 = class Contract {
+let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), _dec4 = view(), _dec5 = view(), _dec6 = view(), _dec7 = view(), _dec8 = call({}), _dec9 = call({}), _dec10 = call({}), _dec11 = view(), _dec12 = call({
+  payableFunction: true
+}), _dec13 = call({
+  payableFunction: true
+}), _dec14 = call({
+  payableFunction: true
+}), _dec15 = view(), _dec(_class = (_class2 = class Contract {
   // key: TokenId, value: AccountId
   // key: TokenId, value: Token
   // key: AccountId, value: UnorderedSet<TokenId>
@@ -1096,6 +1679,7 @@ let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), 
     this.token_by_id = new LookupMap("b");
     this.tokens_per_owner = new LookupMap("c");
     this.approvals_by_id = new LookupMap("d");
+    this.next_approval_id_by_id = new LookupMap("e");
   }
   init({
     owner_id,
@@ -1107,13 +1691,15 @@ let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), 
     this.token_by_id = new LookupMap("b");
     this.tokens_per_owner = new LookupMap("c");
     this.approvals_by_id = new LookupMap("d");
+    this.next_approval_id_by_id = new LookupMap("e");
   }
   nft_mint({
     token_owner_id,
     token_metadata
   }) {
     this.owner_by_id.set(this.token_id.toString(), token_owner_id);
-    let token = new Token(this.token_id, token_owner_id, token_metadata);
+    const approved_account_ids = this.approvals_by_id ? {} : undefined;
+    let token = new Token(this.token_id, token_owner_id, token_metadata, approved_account_ids);
     this.token_by_id.set(this.token_id.toString(), token);
 
     // Set tokens per owner
@@ -1129,28 +1715,7 @@ let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), 
     return token;
   }
 
-  // ------- CORE FUNCTIONALITY METHODS -------
-  nft_transfer() {}
-  nft_transfer_call() {}
-  nft_resolve_transfer() {}
-  nft_token() {}
-
-  // ------- APPROVAL MANAGEMENT METHODS -------
-  nft_approve() {}
-  nft_revoke() {}
-  nft_revoke_all() {}
-  nft_is_approved() {}
-
   // ------- ENUMERATION METHODS -------
-  // Get the token having specific id
-  get_token_by_id(token_id) {
-    let token = this.token_by_id.get(token_id);
-    if (token === null) {
-      return null;
-    }
-    return token;
-  }
-
   // Returns the total supply of non-fungible tokens
   nft_total_supply() {
     return this.token_id;
@@ -1201,59 +1766,300 @@ let Contract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({}), 
     }
     return ret;
   }
-}, (_applyDecoratedDescriptor(_class2.prototype, "init", [_dec2], Object.getOwnPropertyDescriptor(_class2.prototype, "init"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_mint", [_dec3], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_mint"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_transfer", [_dec4], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_transfer"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_transfer_call", [_dec5], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_transfer_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_resolve_transfer", [_dec6], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_resolve_transfer"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_token", [_dec7], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_token"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_approve", [_dec8], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_approve"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_revoke", [_dec9], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_revoke"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_revoke_all", [_dec10], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_revoke_all"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_is_approved", [_dec11], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_is_approved"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_total_supply", [_dec12], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_total_supply"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_tokens", [_dec13], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_tokens"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_supply_for_owner", [_dec14], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_supply_for_owner"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_tokens_for_owner", [_dec15], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_tokens_for_owner"), _class2.prototype)), _class2)) || _class);
-function nft_tokens_for_owner() {
-  const _state = Contract._getState();
-  if (!_state && Contract._requireInit()) {
-    throw new Error("Contract must be initialized");
+
+  // ------- CORE FUNCTIONALITY METHODS -------
+  nft_transfer({
+    receiver_id,
+    token_id,
+    approval_id,
+    memo
+  }) {
+    const sender_id = predecessorAccountId();
+    this.internal_transfer(sender_id, receiver_id, token_id, approval_id, memo);
   }
-  const _contract = Contract._create();
-  if (_state) {
-    Contract._reconstruct(_contract, _state);
+  nft_transfer_call({
+    receiver_id,
+    token_id,
+    approval_id,
+    memo,
+    msg
+  }) {
+    assert(prepaidGas() > GAS_FOR_NFT_TRANSFER_CALL, "Not enough prepaid gas");
+    const sender_id = predecessorAccountId();
+    const [previous_owner_id, approved_account_ids] = this.internal_transfer(sender_id, receiver_id, token_id, approval_id, memo);
+    const promise = NearPromise.new(receiver_id).functionCall("nft_on_transfer", JSON.stringify({
+      sender_id,
+      previous_owner_id,
+      token_id,
+      msg
+    }), BigInt(0), prepaidGas() - GAS_FOR_NFT_TRANSFER_CALL).then(NearPromise.new(currentAccountId()).functionCall("nft_resolve_transfer", JSON.stringify({
+      previous_owner_id,
+      receiver_id,
+      token_id,
+      approved_account_ids
+    }), BigInt(0), GAS_FOR_RESOLVE_TRANSFER));
+    return promise;
   }
-  const _args = Contract._getArgs();
-  const _result = _contract.nft_tokens_for_owner(_args);
-  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
-}
-function nft_supply_for_owner() {
-  const _state = Contract._getState();
-  if (!_state && Contract._requireInit()) {
-    throw new Error("Contract must be initialized");
+  nft_resolve_transfer({
+    previous_owner_id,
+    receiver_id,
+    token_id,
+    approved_account_ids
+  }) {
+    let must_revert = false;
+    let p;
+    try {
+      p = promiseResult(0);
+    } catch (e) {
+      if (e.message.includes("Not Ready")) {
+        throw new Error();
+      } else {
+        must_revert = true;
+      }
+    }
+    if (!must_revert) {
+      try {
+        const yes_or_no = JSON.parse(p);
+        if (typeof yes_or_no == "boolean") {
+          must_revert = yes_or_no;
+        } else {
+          must_revert = true;
+        }
+      } catch (_e) {
+        must_revert = true;
+      }
+    }
+    if (!must_revert) {
+      return true;
+    }
+    const current_owner = this.owner_by_id.get(token_id);
+    if (current_owner) {
+      if (current_owner != receiver_id) {
+        return true;
+      }
+    } else {
+      if (approved_account_ids) {
+        this.refund_storage_deposit(previous_owner_id, serialize(approved_account_ids).length);
+      }
+      return true;
+    }
+    this.internal_transfer_unguarded(token_id, receiver_id, previous_owner_id);
+    if (this.approvals_by_id) {
+      const receiver_approvals = this.approvals_by_id.get(token_id);
+      if (receiver_approvals) {
+        this.refund_storage_deposit(receiver_id, serialize(receiver_approvals).length);
+      }
+      if (approved_account_ids) {
+        this.approvals_by_id.set(token_id, approved_account_ids);
+      }
+    }
+    return false;
   }
-  const _contract = Contract._create();
-  if (_state) {
-    Contract._reconstruct(_contract, _state);
+  nft_token({
+    token_id
+  }) {
+    const owner_id = this.owner_by_id.get(token_id);
+    if (owner_id == null) {
+      return null;
+    }
+    const token = this.token_by_id?.get(token_id, {
+      reconstructor: Token.reconstruct
+    });
+    const approved_account_ids = this.approvals_by_id?.get(token_id);
+    return new Token(parseInt(token_id), owner_id, token.token_metadata, approved_account_ids);
   }
-  const _args = Contract._getArgs();
-  const _result = _contract.nft_supply_for_owner(_args);
-  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
-}
-function nft_tokens() {
-  const _state = Contract._getState();
-  if (!_state && Contract._requireInit()) {
-    throw new Error("Contract must be initialized");
+
+  // ------- APPROVAL MANAGEMENT METHODS -------
+  nft_approve({
+    token_id,
+    account_id,
+    msg
+  }) {
+    if (this.approvals_by_id === null) {
+      throw new Error("NFT does not support Approval Management");
+    }
+    const approvals_by_id = this.approvals_by_id;
+    const token = this.owner_by_id.get(token_id);
+    if (token === null) {
+      throw new Error("Token not found");
+    }
+    const owner_id = token;
+    assert(predecessorAccountId() === owner_id, "Predecessor must be token owner.");
+    if (this.next_approval_id_by_id === null) {
+      throw new Error("next_approval_by_id must be set for approval ext");
+    }
+    const next_approval_id_by_id = this.next_approval_id_by_id;
+    const approved_account_ids = approvals_by_id.get(token_id) ?? {};
+    const approval_id = next_approval_id_by_id.get(token_id) ?? BigInt(1);
+    const old_approved_account_ids_size = serialize(approved_account_ids).length;
+    approved_account_ids[account_id] = approval_id;
+    const new_approved_account_ids_size = serialize(approved_account_ids).length;
+    approvals_by_id.set(token_id, approved_account_ids);
+    next_approval_id_by_id.set(token_id, approval_id + BigInt(1));
+    const storage_used = new_approved_account_ids_size - old_approved_account_ids_size;
+    this.refund_deposit(BigInt(storage_used));
+    if (msg) {
+      return NearPromise.new(account_id).functionCall("nft_on_approve", serialize({
+        token_id,
+        owner_id,
+        approval_id,
+        msg
+      }), BigInt(0), prepaidGas() - GAS_FOR_NFT_APPROVE);
+    }
+    return null;
   }
-  const _contract = Contract._create();
-  if (_state) {
-    Contract._reconstruct(_contract, _state);
+  nft_revoke({
+    token_id,
+    account_id
+  }) {
+    if (this.approvals_by_id === null) {
+      throw new Error("NFT does not support Approval Management");
+    }
+    const approvals_by_id = this.approvals_by_id;
+    const token = this.owner_by_id.get(token_id);
+    if (token === null) {
+      throw new Error("Token not found");
+    }
+    const owner_id = token;
+    const predecessorAccountId$1 = predecessorAccountId();
+    assert(predecessorAccountId$1 === owner_id, "Predecessor must be token owner.");
+    const approved_account_ids = approvals_by_id.get(token_id);
+    const old_approved_account_ids_size = serialize(approved_account_ids).length;
+    let new_approved_account_ids_size;
+    if (approved_account_ids[account_id]) {
+      delete approved_account_ids[account_id];
+      if (Object.keys(approved_account_ids).length === 0) {
+        approvals_by_id.remove(token_id);
+        new_approved_account_ids_size = serialize(approved_account_ids).length;
+      } else {
+        approvals_by_id.set(token_id, approved_account_ids);
+        new_approved_account_ids_size = 0;
+      }
+      const promise_id = promiseBatchCreate(predecessorAccountId$1);
+      promiseBatchActionTransfer(promise_id, BigInt(new_approved_account_ids_size - old_approved_account_ids_size) * storageByteCost());
+      promiseReturn(promise_id);
+    }
   }
-  const _args = Contract._getArgs();
-  const _result = _contract.nft_tokens(_args);
-  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
-}
-function nft_total_supply() {
-  const _state = Contract._getState();
-  if (!_state && Contract._requireInit()) {
-    throw new Error("Contract must be initialized");
+  nft_revoke_all({
+    token_id
+  }) {
+    if (this.approvals_by_id === null) {
+      throw new Error("NFT does not support Approval Management");
+    }
+    const approvals_by_id = this.approvals_by_id;
+    const token = this.owner_by_id.get(token_id);
+    if (token === null) {
+      throw new Error("Token not found");
+    }
+    const owner_id = token;
+    const predecessorAccountId$1 = predecessorAccountId();
+    assert(predecessorAccountId$1 === owner_id, "Predecessor must be token owner.");
+    const approved_account_ids = approvals_by_id.get(token_id);
+    if (approved_account_ids) {
+      const promise_id = promiseBatchCreate(predecessorAccountId$1);
+      promiseBatchActionTransfer(promise_id, BigInt(serialize(approved_account_ids).length) * storageByteCost());
+      promiseReturn(promise_id);
+      approvals_by_id.remove(token_id);
+    }
   }
-  const _contract = Contract._create();
-  if (_state) {
-    Contract._reconstruct(_contract, _state);
+  nft_is_approved({
+    token_id,
+    approved_account_id,
+    approval_id
+  }) {
+    const token = this.owner_by_id.get(token_id);
+    if (token === null) {
+      throw new Error("Token not found");
+    }
+    if (this.approvals_by_id === null) {
+      return false;
+    }
+    const approvals_by_id = this.approvals_by_id;
+    const approved_account_ids = approvals_by_id.get(token_id);
+    if (approved_account_ids === null) {
+      return false;
+    }
+    const actual_approval_id = approved_account_ids[approved_account_id];
+    if (actual_approval_id === undefined) {
+      return false;
+    }
+    if (approval_id) {
+      return BigInt(approval_id) === actual_approval_id;
+    }
+    return true;
   }
-  const _args = Contract._getArgs();
-  const _result = _contract.nft_total_supply(_args);
-  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
-}
+
+  // PRIVATE METHODS
+  // Get the token having specific id
+  get_token_by_id(token_id) {
+    let token = this.token_by_id.get(token_id);
+    if (token === null) {
+      return null;
+    }
+    return token;
+  }
+  internal_transfer(sender_id, receiver_id, token_id, approval_id, memo) {
+    const owner_id = this.owner_by_id.get(token_id);
+    if (owner_id == null) {
+      throw new Error("Token not found");
+    }
+    const approved_account_ids = this.approvals_by_id?.remove(token_id);
+    if (sender_id != owner_id) {
+      if (!approved_account_ids) {
+        throw new Error("Unauthorized");
+      }
+      const actual_approval_id = approved_account_ids[sender_id];
+      if (!actual_approval_id) {
+        throw new Error("Sender not approved");
+      }
+      assert(approval_id === undefined || approval_id == actual_approval_id, `The actual approval_id ${actual_approval_id} is different from the given ${approval_id}`);
+    }
+    assert(owner_id != receiver_id, "Current and next owner must differ");
+    this.internal_transfer_unguarded(token_id, owner_id, receiver_id);
+    return [owner_id, approved_account_ids];
+  }
+  internal_transfer_unguarded(token_id, from, to) {
+    this.owner_by_id.set(token_id, to);
+    if (this.tokens_per_owner) {
+      const owner_tokens_set = this.tokens_per_owner.get(from, {
+        reconstructor: UnorderedSet.reconstruct
+      });
+      if (owner_tokens_set == null) {
+        throw new Error("Unable to access tokens per owner in unguarded call.");
+      }
+      owner_tokens_set.remove(token_id);
+      if (owner_tokens_set.isEmpty()) {
+        this.tokens_per_owner.remove(from);
+      } else {
+        this.tokens_per_owner.set(from, owner_tokens_set);
+      }
+      let receiver_tokens_set = this.tokens_per_owner.get(to, {
+        reconstructor: UnorderedSet.reconstruct
+      });
+      receiver_tokens_set.set(token_id);
+      this.tokens_per_owner.set(to, receiver_tokens_set);
+    }
+  }
+  refund_storage_deposit(account_id, storage_released) {
+    const promise_id = promiseBatchCreate(account_id);
+    promiseBatchActionTransfer(promise_id, BigInt(storage_released) * storageByteCost());
+    promiseReturn(promise_id);
+  }
+  refund_deposit(storage_used) {
+    this.refund_deposit_to_account(storage_used, predecessorAccountId());
+  }
+  refund_deposit_to_account(storage_used, account_id) {
+    const required_cost = storageByteCost() * storage_used;
+    const attached_deposit = attachedDeposit();
+    assert(required_cost <= attached_deposit, `Must attach ${required_cost} yoctoNEAR to cover storage`);
+    const refund = attached_deposit - required_cost;
+    if (refund > BigInt(1)) {
+      const promise_id = promiseBatchCreate(account_id);
+      promiseBatchActionTransfer(promise_id, refund);
+      promiseReturn(promise_id);
+    }
+  }
+}, (_applyDecoratedDescriptor(_class2.prototype, "init", [_dec2], Object.getOwnPropertyDescriptor(_class2.prototype, "init"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_mint", [_dec3], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_mint"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_total_supply", [_dec4], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_total_supply"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_tokens", [_dec5], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_tokens"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_supply_for_owner", [_dec6], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_supply_for_owner"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_tokens_for_owner", [_dec7], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_tokens_for_owner"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_transfer", [_dec8], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_transfer"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_transfer_call", [_dec9], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_transfer_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_resolve_transfer", [_dec10], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_resolve_transfer"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_token", [_dec11], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_token"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_approve", [_dec12], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_approve"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_revoke", [_dec13], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_revoke"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_revoke_all", [_dec14], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_revoke_all"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "nft_is_approved", [_dec15], Object.getOwnPropertyDescriptor(_class2.prototype, "nft_is_approved"), _class2.prototype)), _class2)) || _class);
 function nft_is_approved() {
   const _state = Contract._getState();
   if (!_state && Contract._requireInit()) {
@@ -1362,6 +2168,58 @@ function nft_transfer() {
   const _args = Contract._getArgs();
   const _result = _contract.nft_transfer(_args);
   Contract._saveToStorage(_contract);
+  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
+}
+function nft_tokens_for_owner() {
+  const _state = Contract._getState();
+  if (!_state && Contract._requireInit()) {
+    throw new Error("Contract must be initialized");
+  }
+  const _contract = Contract._create();
+  if (_state) {
+    Contract._reconstruct(_contract, _state);
+  }
+  const _args = Contract._getArgs();
+  const _result = _contract.nft_tokens_for_owner(_args);
+  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
+}
+function nft_supply_for_owner() {
+  const _state = Contract._getState();
+  if (!_state && Contract._requireInit()) {
+    throw new Error("Contract must be initialized");
+  }
+  const _contract = Contract._create();
+  if (_state) {
+    Contract._reconstruct(_contract, _state);
+  }
+  const _args = Contract._getArgs();
+  const _result = _contract.nft_supply_for_owner(_args);
+  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
+}
+function nft_tokens() {
+  const _state = Contract._getState();
+  if (!_state && Contract._requireInit()) {
+    throw new Error("Contract must be initialized");
+  }
+  const _contract = Contract._create();
+  if (_state) {
+    Contract._reconstruct(_contract, _state);
+  }
+  const _args = Contract._getArgs();
+  const _result = _contract.nft_tokens(_args);
+  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
+}
+function nft_total_supply() {
+  const _state = Contract._getState();
+  if (!_state && Contract._requireInit()) {
+    throw new Error("Contract must be initialized");
+  }
+  const _contract = Contract._create();
+  if (_state) {
+    Contract._reconstruct(_contract, _state);
+  }
+  const _args = Contract._getArgs();
+  const _result = _contract.nft_total_supply(_args);
   if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(Contract._serialize(_result, true));
 }
 function nft_mint() {

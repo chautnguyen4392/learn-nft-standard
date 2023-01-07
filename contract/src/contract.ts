@@ -150,16 +150,7 @@ class Contract {
     return token;
   }
 
-    // ------- ENUMERATION METHODS -------
-  // Get the token having specific id
-  get_token_by_id(token_id: string) {
-    let token = this.token_by_id.get(token_id);
-    if (token === null) {
-      return null
-    }
-    return token;
-  }
-
+  // ------- ENUMERATION METHODS -------
   // Returns the total supply of non-fungible tokens
   @view({})
   nft_total_supply() {
@@ -370,7 +361,7 @@ class Contract {
   }
 
   // ------- APPROVAL MANAGEMENT METHODS -------
-  @call({})
+  @call({ payableFunction: true })
   nft_approve({
     token_id,
     account_id,
@@ -428,7 +419,7 @@ class Contract {
     return null;
   }
 
-  @call({})
+  @call({ payableFunction: true })
   nft_revoke({
     token_id,
     account_id,
@@ -474,7 +465,7 @@ class Contract {
     }
   }
 
-  @call({})
+  @call({ payableFunction: true })
   nft_revoke_all({ token_id }: { token_id: string }) {
     if (this.approvals_by_id === null) {
       throw new Error("NFT does not support Approval Management");
@@ -538,6 +529,15 @@ class Contract {
   }
 
   // PRIVATE METHODS
+  // Get the token having specific id
+  get_token_by_id(token_id: string) {
+    let token = this.token_by_id.get(token_id);
+    if (token === null) {
+      return null
+    }
+    return token;
+  }
+
   internal_transfer(
     sender_id: string,
     receiver_id: string,
